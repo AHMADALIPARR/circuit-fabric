@@ -34,6 +34,14 @@ rendering produced by the BEAM renderer: the four tabs in their
 initial state, with no JavaScript. The interactive exchange runs
 on the BEAM server.
 
+## Screenshots
+
+The console running on BEAM, rendered locally:
+
+![Fabric tab](images/fabric.png)
+
+![Circuits tab](images/circuits.png)
+
 ## Layout
 
 - `beam/scf_model.erl` — topology, admission decisions, pathfinding,
@@ -50,3 +58,9 @@ on the BEAM server.
 
     ./run.sh            # serves on SCF_PORT (default 8080)
     ./run_tests.sh      # compiles everything and runs the suite
+
+## License
+
+SnapKitty Opaque Source License, Version 1.0 — see `LICENSE`.
+SPDX-License-Identifier: LicenseRef-Sovereign-Leviathan-SL-AGPL3-001
+Copyright © 2026 SnapKitty West. All rights reserved.
