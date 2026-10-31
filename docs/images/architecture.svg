@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" font-family="ui-sans-serif,system-ui,sans-serif">
+  <rect width="1100" height="640" fill="#0d1117"/>
+  <text x="550" y="36" text-anchor="middle" fill="#f0f6fc" font-size="22" font-weight="700">Sovereign Circuit Fabric — Console</text>
+  <text x="550" y="58" text-anchor="middle" fill="#8b949e" font-size="13">BEAM exchange · gen_statem actors · fixed-point pricing · no JavaScript UI</text>
+
+  <!-- Topology -->
+  <rect x="40" y="80" width="500" height="220" rx="12" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+  <text x="60" y="108" fill="#58a6ff" font-size="14" font-weight="700">REFERENCE TOPOLOGY</text>
+  <circle cx="120" cy="180" r="28" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="120" y="185" text-anchor="middle" fill="#e6edf3" font-size="12">N</text>
+  <circle cx="280" cy="140" r="28" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="280" y="145" text-anchor="middle" fill="#e6edf3" font-size="12">W</text>
+  <circle cx="280" cy="220" r="28" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="280" y="225" text-anchor="middle" fill="#e6edf3" font-size="12">E</text>
+  <circle cx="440" cy="180" r="28" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="440" y="185" text-anchor="middle" fill="#e6edf3" font-size="12">S</text>
+  <line x1="148" y1="180" x2="252" y2="150" stroke="#8b949e" stroke-width="2"/>
+  <line x1="148" y1="180" x2="252" y2="210" stroke="#8b949e" stroke-width="2"/>
+  <line x1="308" y1="150" x2="412" y2="180" stroke="#8b949e" stroke-width="2"/>
+  <line x1="308" y1="210" x2="412" y2="180" stroke="#8b949e" stroke-width="2"/>
+  <line x1="280" y1="168" x2="280" y2="192" stroke="#a371f7" stroke-width="3"/>
+  <text x="60" y="270" fill="#8b949e" font-size="11">edge links 10 Mb/s · backbone W–E 20 Mb/s · shortest-path admission</text>
+
+  <!-- Lifecycle -->
+  <rect x="560" y="80" width="500" height="220" rx="12" fill="#161b22" stroke="#a371f7" stroke-width="2"/>
+  <text x="580" y="108" fill="#a371f7" font-size="14" font-weight="700">CIRCUIT LIFECYCLE</text>
+  <text x="580" y="140" fill="#e6edf3" font-size="12">FREE → REQUESTED → ADMITTED → RESERVED</text>
+  <text x="580" y="162" fill="#e6edf3" font-size="12">→ INSTALLED → ACTIVE → DRAINING → RELEASED</text>
+  <text x="580" y="184" fill="#f85149" font-size="12">FAILED from any held state · then RELEASED</text>
+  <text x="580" y="220" fill="#8b949e" font-size="12">one gen_statem process per circuit</text>
+  <text x="580" y="242" fill="#8b949e" font-size="12">illegal transitions rejected by the actor</text>
+  <text x="580" y="264" fill="#8b949e" font-size="12">tariff version locked at admission</text>
+
+  <!-- Stack -->
+  <rect x="40" y="320" width="320" height="280" rx="12" fill="#161b22" stroke="#3fb950" stroke-width="2"/>
+  <text x="60" y="348" fill="#3fb950" font-size="14" font-weight="700">BEAM STACK</text>
+  <text x="60" y="380" fill="#e6edf3" font-size="13">scf_console — entry</text>
+  <text x="60" y="406" fill="#e6edf3" font-size="13">scf_http — HTTP/1.1 gen_tcp</text>
+  <text x="60" y="432" fill="#e6edf3" font-size="13">scf_render — four tabs HTML</text>
+  <text x="60" y="458" fill="#e6edf3" font-size="13">scf_exchange — fabric state</text>
+  <text x="60" y="484" fill="#e6edf3" font-size="13">scf_model — topology codec</text>
+  <text x="60" y="510" fill="#e6edf3" font-size="13">circuit_actor — lifecycle</text>
+  <text x="60" y="536" fill="#e6edf3" font-size="13">pricing — fixed-point charge</text>
+  <text x="60" y="570" fill="#8b949e" font-size="12">no JS · form posts · re-render</text>
+
+  <!-- Pricing -->
+  <rect x="380" y="320" width="340" height="280" rx="12" fill="#161b22" stroke="#f85149" stroke-width="2"/>
+  <text x="400" y="348" fill="#f85149" font-size="14" font-weight="700">PRICING</text>
+  <text x="400" y="380" fill="#e6edf3" font-size="13">Charge = Setup</text>
+  <text x="400" y="404" fill="#e6edf3" font-size="13">+ Reserved capacity</text>
+  <text x="400" y="428" fill="#e6edf3" font-size="13">+ Usage</text>
+  <text x="400" y="452" fill="#e6edf3" font-size="13">+ Priority</text>
+  <text x="400" y="488" fill="#8b949e" font-size="12">setup posts at admission</text>
+  <text x="400" y="512" fill="#8b949e" font-size="12">reservation per clock second</text>
+  <text x="400" y="536" fill="#8b949e" font-size="12">usage + priority on release</text>
+  <text x="400" y="570" fill="#3fb950" font-size="12">integer minor units only</text>
+
+  <!-- Evidence -->
+  <rect x="740" y="320" width="320" height="280" rx="12" fill="#161b22" stroke="#e3b341" stroke-width="2"/>
+  <text x="760" y="348" fill="#e3b341" font-size="14" font-weight="700">EVIDENCE</text>
+  <text x="760" y="380" fill="#e6edf3" font-size="13">9 model invariants</text>
+  <text x="760" y="404" fill="#e6edf3" font-size="13">checked every render</text>
+  <text x="760" y="436" fill="#e6edf3" font-size="13">9 suite tests · all pass</text>
+  <text x="760" y="460" fill="#e6edf3" font-size="13">pricing vector 2500 minor</text>
+  <text x="760" y="484" fill="#e6edf3" font-size="13">HTTP full lifecycle run</text>
+  <text x="760" y="520" fill="#8b949e" font-size="12">20-byte frame · magic SCF</text>
+  <text x="760" y="544" fill="#8b949e" font-size="12">append-only ledger</text>
+  <text x="760" y="568" fill="#8b949e" font-size="12">idempotent transcript</text>
+</svg>
