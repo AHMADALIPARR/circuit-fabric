@@ -8,9 +8,13 @@ This is the running console for the model defined in [sovereign-circuit-fabric](
 
 ## Screenshots
 
-![Fabric tab](images/fabric.png)
+<p align="center">
+  <img src="images/fabric.png" alt="Fabric tab" width="420" />
+  &nbsp;
+  <img src="images/circuits.png" alt="Circuits tab" width="420" />
+</p>
 
-![Circuits tab](images/circuits.png)
+<p align="center"><sub>Fabric · Circuits — BEAM console, local render</sub></p>
 
 ---
 
