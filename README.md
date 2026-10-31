@@ -1,72 +1,81 @@
-# Sovereign Circuit Fabric — Console
+# Circuit Fabric
 
-Phase I exchange console on **Erlang/OTP (BEAM)**. Server-rendered HTML only — no JavaScript. Every action is a link or a form post; the exchange re-renders the page.
+Phase I exchange console on Erlang/OTP. Server-rendered HTML, no JavaScript in the exchange UI. Form posts drive a live BEAM model: topology, admission, per-circuit actors, fixed-point pricing, ledger.
 
-This is the running console for the model defined in [sovereign-circuit-fabric](https://github.com/AHMADALIPARR/sovereign-circuit-fabric). It **executes** the exchange rather than only documenting it.
-
----
-
-## Screenshots
-
-<p align="center">
-  <img src="images/fabric.png" alt="Fabric tab" width="280" />
-  &nbsp;
-  <img src="images/circuits.png" alt="Circuits tab" width="280" />
-</p>
-
-<p align="center"><sub>Fabric · Circuits</sub></p>
+Source model: [sovereign-circuit-fabric](https://github.com/AHMADALIPARR/sovereign-circuit-fabric).
 
 ---
 
-## Architecture map
+## Interactive 2D circuits
+
+Open the map and click a circuit to highlight its path on the fabric:
+
+**[Open 2D circuit map](circuits-2d.html)** · [docs copy](docs/circuits-2d.html)
 
 ```mermaid
 flowchart TB
-    subgraph UI[Four tabs no JavaScript]
-        FAB[Fabric]
-        CIR[Circuits]
-        LED[Ledger]
-        EVI[Evidence]
-    end
-
-    HTTP[scf_http gen_tcp] --> REND[scf_render]
-    REND --> UI
-    HTTP --> EX[scf_exchange]
-    EX --> MODEL[scf_model]
-    EX --> ACTOR[circuit_actor per circuit]
-    EX --> PRICE[pricing]
-    EX --> LEDGER[append-only ledger]
+    N[N]
+    W[W]
+    E[E]
+    S[S]
+    N --- W
+    N --- E
+    W --- S
+    E --- S
+    W --- E
 ```
 
-Full diagram asset: [docs/images/architecture.svg](docs/images/architecture.svg)
-
----
-
-## What runs
-
-| Concern | Implementation |
+| Link | Capacity |
 | --- | --- |
-| Lifecycle legality | One `circuit_actor` gen_statem per circuit |
-| Charges | `pricing.erl` fixed-point integer components |
-| Topology | Four nodes N W E S — edge 10 Mb/s, backbone W–E 20 Mb/s |
-| Admission | Deterministic shortest path with per-link reservation |
-| Tariffs | Version locked at admission |
-| Frames | 20-byte circuit frame, magic SCF, network order, Internet checksum |
-| Audit | Append-only ledger + transaction transcript with idempotent replay |
-| Evidence | Nine invariants checked on every render |
+| N–W, N–E, W–S, E–S | 10 Mb/s |
+| W–E backbone | 20 Mb/s |
 
-`beam/circuit_actor.erl` and `beam/pricing.erl` are copies of the modules in sovereign-circuit-fabric (`control/beam/circuit_actor.erl`, `accounting/pricing.erl`). That repo is the authority; changes land there first and are re-copied.
+Admission uses deterministic shortest path with per-link reservation.
 
 ---
 
-## Circuit lifecycle
+## Console shots
+
+<p align="center">
+  <img src="images/fabric.png" alt="Fabric tab" width="240" />
+  <img src="images/circuits.png" alt="Circuits tab" width="240" />
+</p>
+
+Static tab renders: [Fabric](index.html) · [Circuits](circuits.html) · [Ledger](ledger.html) · [Evidence](evidence.html)
+
+---
+
+## Stack
+
+```mermaid
+flowchart LR
+    HTTP[scf_http] --> Render[scf_render]
+    HTTP --> Exchange[scf_exchange]
+    Exchange --> Model[scf_model]
+    Exchange --> Actor[circuit_actor]
+    Exchange --> Price[pricing]
+```
+
+| Module | Role |
+| --- | --- |
+| scf_console | Entry |
+| scf_http | HTTP/1.1 on gen_tcp |
+| scf_render | Four tabs as HTML |
+| scf_exchange | State, commands, ledger |
+| scf_model | Topology, frames, invariants |
+| circuit_actor | One gen_statem per circuit |
+| pricing | Integer minor-unit charges |
+
+---
+
+## Lifecycle
 
 ```mermaid
 stateDiagram-v2
     [*] --> FREE
     FREE --> REQUESTED: request
     REQUESTED --> ADMITTED: admit
-    REQUESTED --> FREE: reject or timeout
+    REQUESTED --> FREE: reject
     ADMITTED --> RESERVED: reserve
     RESERVED --> INSTALLED: install
     INSTALLED --> ACTIVE: activate
@@ -76,89 +85,65 @@ stateDiagram-v2
     RESERVED --> FAILED: fail
     INSTALLED --> FAILED: fail
     ACTIVE --> FAILED: fail
-    DRAINING --> FAILED: fail
     FAILED --> RELEASED: release
     RELEASED --> FREE: recycle
 ```
 
-Illegal transitions are rejected by the owning actor process.
+| Stage | Meaning |
+| --- | --- |
+| FREE | No resources |
+| REQUESTED | Awaiting admit |
+| ADMITTED | Policy accepted, tariff locked |
+| RESERVED | Bandwidth held on path |
+| INSTALLED | Forwarding entries set |
+| ACTIVE | Carrying traffic |
+| DRAINING | Teardown in progress |
+| RELEASED | Final charge posted |
+| FAILED | Fault; still must release |
 
 ---
 
 ## Pricing
 
 ```text
-Charge = SetupFee + ReservedCapacityCharge + UsageCharge + PriorityCharge
+Charge = Setup + ReservedCapacity + Usage + Priority
 ```
 
-- **Setup** posts at admission  
-- **Reservation** posts once per clock second while bandwidth is held including FAILED  
-- **Usage** and **priority** post once on release  
-- All values are integer minor units — no binary floating point  
-
-Reference suite vector settles **2500** minor units (0.2500) both in-process and over HTTP: ESTABLISHMENT, ten RESERVATION events, FINAL.
-
----
-
-## Reference topology
-
-```mermaid
-flowchart LR
-    N[N] --- W[W]
-    N --- E[E]
-    W --- S[S]
-    E --- S[S]
-    W --- E
-```
-
-- Edge links: 10 Mb/s  
-- Backbone W–E: 20 Mb/s  
-- Capacities are reference values so exhaustion is observable — not measured hardware  
-
----
-
-## Module layout
-
-| Module | Role |
+| Event | When |
 | --- | --- |
-| `beam/scf_console.erl` | Entry point |
-| `beam/scf_http.erl` | Small HTTP/1.1 server on gen_tcp |
-| `beam/scf_render.erl` | Fabric, Circuits, Ledger, Evidence tabs as HTML/CSS |
-| `beam/scf_exchange.erl` | Fabric state, commands, actors, ledger, transcript |
-| `beam/scf_model.erl` | Topology, admission, pathfinding, frame codec, invariants |
-| `beam/circuit_actor.erl` | Per-circuit gen_statem lifecycle |
-| `beam/pricing.erl` | Fixed-point charge components |
-| `beam/scf_console_test.erl` | Test suite |
+| Setup | Admission |
+| Reservation | Each clock second while held |
+| Usage + priority | Once on release |
 
-Static GitHub Pages copies live at the repo root and under `docs/` (Fabric, Circuits, Ledger, Evidence, stylesheet). Pages is static only — forms do not run the exchange. Interactive use requires the BEAM server.
+Integer minor units only. Suite vector: **2500** minor units.
 
 ---
 
 ## Run
 
 ```sh
-./run.sh            # serve on SCF_PORT default 8080
-./run_tests.sh      # compile and run the suite
+./run.sh         # SCF_PORT default 8080
+./run_tests.sh   # 9 tests
 ```
 
-Requires a local Erlang/OTP install (`erlc`, `erl`).
+Needs `erlc` and `erl`. Exchange state is in-memory; restart resets the fabric.
 
 ---
 
-## Evidence and limits
+## Evidence
 
-See [STATUS.md](STATUS.md) for plain facts.
+| Check | Result |
+| --- | --- |
+| Model suite | 9 tests pass |
+| Invariants | 9 checked after each command |
+| HTTP lifecycle | create through release |
+| Pages site | static snapshot only |
 
-- Suite: 9 tests, all passing; nine model invariants after every successful command  
-- HTTP-driven full lifecycle: create through release, link failure, tariff revision, reset  
-- All four tabs render with no JavaScript  
-- Exchange state is in-process only — restart resets to the reference topology  
-- Not run here: p4c, GHDL, Why3, Dafny those stay on the source fabric repo  
+Details: [STATUS.md](STATUS.md)
 
 ---
 
 ## License
 
-SnapKitty Opaque Source License, Version 1.0 — see `LICENSE`.  
-SPDX-License-Identifier: LicenseRef-Sovereign-Leviathan-SL-AGPL3-001  
-Copyright © 2026 SnapKitty West. All rights reserved.
+SnapKitty Opaque Source License 1.0 — see `LICENSE`.  
+Copyright © 2026 SnapKitty West.
