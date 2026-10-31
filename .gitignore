@@ -1,5 +1,2 @@
-node_modules/
-.project_id
-.github_repo
-.env
-.env.*
+*.beam
+erl_crash.dump
