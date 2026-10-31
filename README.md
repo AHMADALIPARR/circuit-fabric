@@ -9,11 +9,7 @@ Actors and pricing here are copies of that tree’s `circuit_actor.erl` / `prici
 
 ---
 
-## Console
-
-![Fabric tab](https://raw.githubusercontent.com/AHMADALIPARR/circuit-fabric/main/images/fabric.png)
-
-![Circuits tab](https://raw.githubusercontent.com/AHMADALIPARR/circuit-fabric/main/images/circuits.png)
+## Run
 
 ```sh
 ./run.sh          # SCF_PORT=8080
@@ -27,7 +23,7 @@ Actors and pricing here are copies of that tree’s `circuit_actor.erl` / `prici
 | Ledger | append-only charge events |
 | Evidence | nine invariants on the live model |
 
-Static snapshots (Pages, read-only): `index.html` `circuits.html` `ledger.html` `evidence.html`
+Static Pages snapshots (read-only): `index.html` `circuits.html` `ledger.html` `evidence.html`
 
 ---
 
