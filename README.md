@@ -9,12 +9,12 @@ This is the running console for the model defined in [sovereign-circuit-fabric](
 ## Screenshots
 
 <p align="center">
-  <img src="images/fabric.png" alt="Fabric tab" width="420" />
+  <img src="images/fabric.png" alt="Fabric tab" width="280" />
   &nbsp;
-  <img src="images/circuits.png" alt="Circuits tab" width="420" />
+  <img src="images/circuits.png" alt="Circuits tab" width="280" />
 </p>
 
-<p align="center"><sub>Fabric · Circuits — BEAM console, local render</sub></p>
+<p align="center"><sub>Fabric · Circuits</sub></p>
 
 ---
 
