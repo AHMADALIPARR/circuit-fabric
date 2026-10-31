@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Circuit Fabric — 2D map</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --edge: #58a6ff;
+    --backbone: #a371f7;
+    --active: #3fb950;
+    --warn: #e3b341;
+    --fail: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+  }
+  aside {
+    border-right: 1px solid var(--border);
+    padding: 1.25rem;
+    background: var(--panel);
+  }
+  h1 { font-size: 1.1rem; margin: 0 0 0.25rem; }
+  p.lead { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.25rem; }
+  label { display: block; font-size: 0.75rem; color: var(--muted); margin: 0.75rem 0 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  button.circuit {
+    display: block; width: 100%; text-align: left;
+    background: #21262d; color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.65rem 0.75rem; margin-bottom: 0.5rem;
+    cursor: pointer; font: inherit;
+  }
+  button.circuit:hover, button.circuit.active {
+    border-color: var(--active);
+    background: #1a2332;
+  }
+  button.circuit small { display: block; color: var(--muted); margin-top: 0.2rem; }
+  main { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; }
+  svg.map { width: min(640px, 100%); height: auto; background: #0a0e14; border-radius: 12px; border: 1px solid var(--border); }
+  .link { stroke: #484f58; stroke-width: 4; fill: none; transition: stroke 0.15s, stroke-width 0.15s; }
+  .link.backbone { stroke: #3d2a5c; stroke-width: 5; }
+  .link.hot { stroke: var(--active); stroke-width: 6; }
+  .link.hot.backbone { stroke: var(--backbone); }
+  .node { fill: #21262d; stroke: #8b949e; stroke-width: 2; }
+  .node.hot { stroke: var(--active); fill: #143d24; }
+  .nlabel { fill: var(--text); font-size: 18px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+  .cap { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+  .status {
+    margin-top: 1rem; width: min(640px, 100%);
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.9rem;
+  }
+  .status code { color: var(--edge); }
+  @media (max-width: 720px) {
+    body { grid-template-columns: 1fr; }
+    aside { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<aside>
+  <h1>2D circuit map</h1>
+  <p class="lead">Reference topology. Select a circuit to highlight its path.</p>
+  <label>Demo circuits</label>
+  <button type="button" class="circuit active" data-path="N-W-E" data-bw="2" data-state="ACTIVE">
+    C-1001 N → E
+    <small>via W · 2 Mb/s · ACTIVE</small>
+  </button>
+  <button type="button" class="circuit" data-path="N-E" data-bw="1" data-state="RESERVED">
+    C-1002 N → E
+    <small>direct edge · 1 Mb/s · RESERVED</small>
+  </button>
+  <button type="button" class="circuit" data-path="W-E-S" data-bw="5" data-state="ADMITTED">
+    C-1003 W → S
+    <small>via E · 5 Mb/s · ADMITTED</small>
+  </button>
+  <button type="button" class="circuit" data-path="N-W-S" data-bw="3" data-state="DRAINING">
+    C-1004 N → S
+    <small>via W · 3 Mb/s · DRAINING</small>
+  </button>
+  <button type="button" class="circuit" data-path="" data-bw="0" data-state="NONE">
+    Clear highlight
+    <small>show topology only</small>
+  </button>
+</aside>
+<main>
+  <svg class="map" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Four node fabric topology">
+    <!-- links -->
+    <line id="L-NW" class="link" x1="160" y1="120" x2="320" y2="200" data-ends="N-W"/>
+    <line id="L-NE" class="link" x1="480" y1="120" x2="320" y2="200" data-ends="N-E"/>
+    <line id="L-WS" class="link" x1="160" y1="360" x2="320" y2="280" data-ends="W-S"/>
+    <line id="L-ES" class="link" x1="480" y1="360" x2="320" y2="280" data-ends="E-S"/>
+    <line id="L-WE" class="link backbone" x1="160" y1="240" x2="480" y2="240" data-ends="W-E"/>
+    <!-- capacity labels -->
+    <text class="cap" x="220" y="150">10 Mb/s</text>
+    <text class="cap" x="420" y="150">10 Mb/s</text>
+    <text class="cap" x="220" y="340">10 Mb/s</text>
+    <text class="cap" x="420" y="340">10 Mb/s</text>
+    <text class="cap" x="320" y="230">backbone 20 Mb/s</text>
+    <!-- nodes -->
+    <circle id="N-N" class="node" cx="320" cy="80" r="28"/>
+    <text class="nlabel" x="320" y="80">N</text>
+    <circle id="N-W" class="node" cx="100" cy="240" r="28"/>
+    <text class="nlabel" x="100" y="240">W</text>
+    <circle id="N-E" class="node" cx="540" cy="240" r="28"/>
+    <text class="nlabel" x="540" y="240">E</text>
+    <circle id="N-S" class="node" cx="320" cy="400" r="28"/>
+    <text class="nlabel" x="320" y="400">S</text>
+  </svg>
+  <div class="status" id="status">
+    Select a circuit on the left to highlight its reserved path.
+  </div>
+</main>
+<script>
+(function () {
+  var buttons = document.querySelectorAll("button.circuit");
+  var links = document.querySelectorAll(".link");
+  var nodes = document.querySelectorAll(".node");
+  var status = document.getElementById("status");
+
+  function clearHot() {
+    links.forEach(function (l) { l.classList.remove("hot"); });
+    nodes.forEach(function (n) { n.classList.remove("hot"); });
+  }
+
+  function endsMatch(dataEnds, a, b) {
+    return dataEnds === a + "-" + b || dataEnds === b + "-" + a;
+  }
+
+  function highlight(path, bw, state, label) {
+    clearHot();
+    if (!path) {
+      status.textContent = "Topology only — no circuit selected.";
+      return;
+    }
+    var parts = path.split("-");
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      var el = document.getElementById("N-" + parts[i]);
+      if (el) el.classList.add("hot");
+    }
+    for (i = 0; i < parts.length - 1; i++) {
+      var a = parts[i], b = parts[i + 1];
+      links.forEach(function (l) {
+        if (endsMatch(l.getAttribute("data-ends"), a, b)) l.classList.add("hot");
+      });
+    }
+    status.innerHTML = "<strong>" + label + "</strong> · path <code>" +
+      path.replace(/-/g, " → ") + "</code> · " + bw + " Mb/s · state <code>" + state + "</code>";
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      buttons.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      var title = btn.childNodes[0].textContent.trim();
+      highlight(btn.getAttribute("data-path"), btn.getAttribute("data-bw"),
+                btn.getAttribute("data-state"), title);
+    });
+  });
+
+  // initial
+  var first = document.querySelector("button.circuit.active");
+  if (first) {
+    highlight(first.getAttribute("data-path"), first.getAttribute("data-bw"),
+              first.getAttribute("data-state"), first.childNodes[0].textContent.trim());
+  }
+})();
+</script>
+</body>
+</html>
