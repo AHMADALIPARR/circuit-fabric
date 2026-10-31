@@ -28,6 +28,12 @@ modules in the sovereign-circuit-fabric repository
 (`control/beam/circuit_actor.erl`, `accounting/pricing.erl`), which
 carries the specifications this console follows.
 
+The console is also published through GitHub Pages
+(ahmadaliparr.github.io/arrow-meadow-marble-gem) as a static
+rendering produced by the BEAM renderer: the four tabs in their
+initial state, with no JavaScript. The interactive exchange runs
+on the BEAM server.
+
 ## Layout
 
 - `beam/scf_model.erl` — topology, admission decisions, pathfinding,

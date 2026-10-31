@@ -29,3 +29,10 @@ Plain facts about verification scope and limits.
 - The console is a single-node model of the Phase I exchange.
   Capacities are reference values chosen so exhaustion is
   observable; they are not measured hardware.
+- The GitHub Pages site is a static rendering generated from the
+  running BEAM console (the four tabs and the stylesheet, links
+  rewritten to relative files, `.nojekyll` set), present both at
+  the repository root and under `docs/`. Pages serves static files
+  only: the published pages show the console in its initial state,
+  and their forms do not run the exchange. Regenerate by fetching
+  the four tabs and `/style.css` from a locally running server.
