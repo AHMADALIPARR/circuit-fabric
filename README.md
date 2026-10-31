@@ -11,10 +11,9 @@ Actors and pricing here are copies of that tree’s `circuit_actor.erl` / `prici
 
 ## Console
 
-<p align="center">
-<img src="images/fabric.png" width="200" alt="fabric" />
-<img src="images/circuits.png" width="200" alt="circuits" />
-</p>
+![Fabric tab](https://raw.githubusercontent.com/AHMADALIPARR/circuit-fabric/main/images/fabric.png)
+
+![Circuits tab](https://raw.githubusercontent.com/AHMADALIPARR/circuit-fabric/main/images/circuits.png)
 
 ```sh
 ./run.sh          # SCF_PORT=8080
